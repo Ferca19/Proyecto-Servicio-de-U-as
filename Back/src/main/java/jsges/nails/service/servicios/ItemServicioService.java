@@ -1,9 +1,8 @@
 package jsges.nails.service.servicios;
 
-import jsges.nails.domain.servicios.ItemServicio;
-import jsges.nails.domain.servicios.Servicio;
-import jsges.nails.repository.servicios.ItemServicioRepository;
-import jsges.nails.repository.servicios.ServicioRepository;
+import jsges.nails.model.ItemServicio;
+import jsges.nails.repository.ItemServicioRepository;
+import jsges.nails.service.servicios_Interface.IItemServicioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

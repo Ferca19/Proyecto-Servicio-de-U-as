@@ -1,10 +1,9 @@
 package jsges.nails.service.servicios;
-import jsges.nails.DTO.articulos.ArticuloVentaDTO;
-import jsges.nails.DTO.servicios.ServicioDTO;
-import jsges.nails.domain.articulos.ArticuloVenta;
-import jsges.nails.domain.servicios.ItemServicio;
-import jsges.nails.domain.servicios.Servicio;
-import jsges.nails.repository.servicios.ServicioRepository;
+
+import jsges.nails.DTO.ServicioDTO;
+import jsges.nails.model.Servicio;
+import jsges.nails.repository.ServicioRepository;
+import jsges.nails.service.servicios_Interface.IServicioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
