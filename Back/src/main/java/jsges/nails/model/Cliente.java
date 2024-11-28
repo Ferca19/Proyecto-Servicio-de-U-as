@@ -16,28 +16,34 @@ import java.util.Date;
 @AllArgsConstructor
 @ToString
 public class Cliente implements Serializable {
+
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Integer id;
 
         @Column(columnDefinition = "TEXT")
+        private String razonSocial;
 
-        String razonSocial;
-        int estado;
-
-        @Column(columnDefinition = "TEXT")
-        String letra;
+        private int estado;
 
         @Column(columnDefinition = "TEXT")
-        String contacto;
+        private String letra;
 
         @Column(columnDefinition = "TEXT")
-        String celular;
+        private String contacto;
+
         @Column(columnDefinition = "TEXT")
-        String mail;
+        private String celular;
 
-        Date fechaInicio;
-        Date fechaNacimiento;
+        @Column(columnDefinition = "TEXT")
+        private String mail;
 
+        private Date fechaInicio;
+
+        private Date fechaNacimiento;
+
+        public void asEliminado() {
+                this.setEstado(1);
+        }
 
 }

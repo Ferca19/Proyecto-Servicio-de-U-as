@@ -10,17 +10,18 @@ import java.util.List;
 
 public interface IArticuloVentaService {
 
-    public List<ArticuloVenta> listar();
+    List<ArticuloVentaDTO> listar() ;
 
-    public ArticuloVenta buscarPorId(Integer id);
+    ArticuloVenta guardar(ArticuloVenta model);
 
-    public ArticuloVenta guardar(ArticuloVenta model);
+    ArticuloVentaDTO obtenerArticuloPorId(Integer id);
 
-    public void eliminar(ArticuloVenta model);
+    ArticuloVentaDTO actualizarArticulo(Integer id, ArticuloVentaDTO modelRecibido);
 
-    public List<ArticuloVenta> listar(String consulta);
+    void eliminarArticulo(Integer id);
 
-    public Page<ArticuloVenta> getArticulos(Pageable pageable);
+    ArticuloVenta crearDesdeDTO(ArticuloVentaDTO modelDTO);
 
-    public Page<ArticuloVentaDTO> findPaginated(Pageable pageable, List<ArticuloVentaDTO> list);
+
+    Page<ArticuloVentaDTO> listarPaginado(String consulta, Pageable pageable);
 }

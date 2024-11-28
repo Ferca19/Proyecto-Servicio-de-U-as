@@ -1,6 +1,8 @@
 package jsges.nails.repository;
 
 import jsges.nails.model.ArticuloVenta;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,8 +14,8 @@ public interface ArticuloVentaRepository extends JpaRepository<ArticuloVenta, In
     @Query("select p from ArticuloVenta p  where p.estado=0 order by p.denominacion")
     List<ArticuloVenta> buscarNoEliminados();
 
+    @Query("SELECT p FROM ArticuloVenta p WHERE p.estado = 0 AND p.denominacion LIKE %:consulta% ORDER BY p.denominacion")
+    Page<ArticuloVenta> buscarNoEliminados(@Param("consulta") String consulta, Pageable pageable);
 
-    @Query("SELECT p FROM ArticuloVenta p WHERE p.estado = 0 AND  p.denominacion LIKE %:consulta% ORDER BY p.denominacion")
-    List<ArticuloVenta> buscarNoEliminados(@Param("consulta") String consulta);
 
 }

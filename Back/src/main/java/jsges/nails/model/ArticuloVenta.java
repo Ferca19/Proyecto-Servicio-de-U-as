@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Data
@@ -12,18 +13,18 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class ArticuloVenta {
-
-
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Integer id;
 
         @Column(columnDefinition = "TEXT")
-        String denominacion;
-        int estado;
+        @NotNull
+        private String denominacion;
+
+        private int estado;
 
         @Column(columnDefinition = "TEXT")
-        String observacion;
+        private String observacion;
 
         @ManyToOne(cascade = CascadeType.ALL)
         private Linea linea;

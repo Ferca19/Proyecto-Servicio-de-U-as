@@ -3,13 +3,16 @@ package jsges.nails.DTO;
 
 import jsges.nails.model.ArticuloVenta;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 
 @Data
+@NoArgsConstructor
 public class ArticuloVentaDTO extends TipoObjetoDTO {
 
-    public Integer id;
-    public String denominacion;
-    public Integer linea;
+    private Integer id;
+    private String denominacion;
+    private Integer linea;
 
     public ArticuloVentaDTO( ArticuloVenta model) {
         this.id = model.getId();
@@ -17,7 +20,4 @@ public class ArticuloVentaDTO extends TipoObjetoDTO {
         this.linea=model.getLinea().getId();
     }
 
-    public ArticuloVentaDTO( ) {
-
-    }
 }

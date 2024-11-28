@@ -1,7 +1,9 @@
 package jsges.nails.controller;
 
+import jsges.nails.DTO.ArticuloVentaDTO;
 import jsges.nails.DTO.ClienteDTO;
 import jsges.nails.excepcion.RecursoNoEncontradoExcepcion;
+import jsges.nails.model.ArticuloVenta;
 import jsges.nails.model.Cliente;
 import jsges.nails.service.servicios_Interface.IClienteService;
 import org.slf4j.Logger;
@@ -9,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @RestController
@@ -21,76 +25,101 @@ import java.util.List;
 @CrossOrigin(value="${path_cross}")
 
 public class ClienteControlador {
+
     private static final Logger logger = LoggerFactory.getLogger(ClienteControlador.class);
+
     @Autowired
-    private IClienteService clienteServicio;
+    private IClienteService modelService;
 
 
-    public ClienteControlador() {
+    @GetMapping("/clientes")
+    public ResponseEntity<List<ClienteDTO>> getAll() {
+        logger.info("Obteniendo todos los clientes");
+
+        // Obtén la lista de ClienteDTO directamente del servicio
+        List<ClienteDTO> listadoDTO = modelService.listar();
+
+        logger.info("Se encontraron {} clientes", listadoDTO.size());
+        return ResponseEntity.ok(listadoDTO);  // Retorna la lista de DTOs
     }
 
-    @GetMapping({"/clientes"})
-    public List<ClienteDTO> getAll() {
-        List<ClienteDTO> listadoDTO    =  new ArrayList<>();
-        List<Cliente> list = this.clienteServicio.listar();
-
-        list.forEach((model) -> {
-            listadoDTO.add(new ClienteDTO(model));
-        });
-        return listadoDTO;
-    }
 
     @GetMapping({"/clientesPageQuery"})
-    public ResponseEntity<Page<ClienteDTO>> getItems(@RequestParam(defaultValue = "") String consulta,@RequestParam(defaultValue = "0") int page,
-                                                  @RequestParam(defaultValue = "${max_page}") int size) {
-        List<Cliente> listado = clienteServicio.listar(consulta);
-        List<ClienteDTO> listadoDTO    =  new ArrayList<>();
-        listado.forEach((model) -> {
-            listadoDTO.add(new ClienteDTO(model));
-        });
-        Page<ClienteDTO> bookPage = clienteServicio.findPaginated(PageRequest.of(page, size),listadoDTO);
-        return ResponseEntity.ok().body(bookPage);
+    public ResponseEntity<Page<ClienteDTO>> getItems(
+            @RequestParam(defaultValue = "") String consulta,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "${max_page}") int size) {
+
+        Page<ClienteDTO> pageResult = modelService.listarPaginado(consulta, PageRequest.of(page, size));
+
+        return ResponseEntity.ok().body(pageResult);
     }
+
 
 
     @PostMapping("/clientes")
-    public Cliente agregar(@RequestBody Cliente cliente){
-       // logger.info("Cliente a agregar: " + cliente);
-        return clienteServicio.guardar(cliente);
+    public ResponseEntity<ClienteDTO> agregar(@RequestBody ClienteDTO modelDTO) {
+        logger.info("Creando un nuevo cliente.");
+
+        try {
+            // Validación del DTO
+            if (modelDTO.getRazonSocial() == null || modelDTO.getCelular().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            // Crear y guardar el modelo
+            Cliente newModel = modelService.crearDesdeDTO(modelDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ClienteDTO(newModel));
+        } catch (NoSuchElementException e) {
+            logger.error("Error al buscar la línea: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            logger.error("Error al guardar el artículo: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
 
-    @PutMapping("/clienteEliminar/{id}")
-    public ResponseEntity<Cliente> eliminar(@PathVariable Integer id){
-        Cliente model = clienteServicio.buscarPorId(id);
-        if (model == null)
-            throw new RecursoNoEncontradoExcepcion("El id recibido no existe: " + id);
 
-        model.setEstado(1);
 
-        clienteServicio.guardar(model);
-        return ResponseEntity.ok(model);
+    @DeleteMapping("/clienteEliminar/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+        try {
+            modelService.eliminarCliente(id);
+            return ResponseEntity.noContent().build(); // Devuelve 204 No Content
+        } catch (RecursoNoEncontradoExcepcion e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Devuelve 404 Not Found
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Manejo genérico de errores
+        }
     }
 
-    @GetMapping("/cliente/{id}")
-    public ResponseEntity<Cliente> getPorId(@PathVariable Integer id){
-        Cliente cliente = clienteServicio.buscarPorId(id);
-        if(cliente == null)
-            throw new RecursoNoEncontradoExcepcion("No se encontro el id: " + id);
-        return ResponseEntity.ok(cliente);
+
+    @GetMapping("/clientes/{id}")
+    public ResponseEntity<ClienteDTO> getPorId(@PathVariable Integer id) {
+        try {
+            ClienteDTO clienteVentaDTO = modelService.obtenerClientePorId(id);
+            return ResponseEntity.ok(clienteVentaDTO);
+        } catch (RecursoNoEncontradoExcepcion e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Devuelve 404 Not Found
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Manejo genérico de errores
+        }
     }
+
 
     @PutMapping("/clientes/{id}")
-    public ResponseEntity<Cliente> actualizar(@PathVariable Integer id,
-                                              @RequestBody Cliente modelRecibido){
-        Cliente model = clienteServicio.buscarPorId(id);
-        if (model == null)
-            throw new RecursoNoEncontradoExcepcion("El id recibido no existe: " + id);
+    public ResponseEntity<ClienteDTO> actualizar(@PathVariable Integer id, @RequestBody ClienteDTO modelRecibido) {
 
-
-
-        clienteServicio.guardar(modelRecibido);
-        return ResponseEntity.ok(modelRecibido);
+        try {
+            ClienteDTO clienteActualizado = modelService.actualizarCliente(id, modelRecibido);
+            return ResponseEntity.ok(clienteActualizado);
+        } catch (RecursoNoEncontradoExcepcion e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Devuelve 404 si no existe el artículo
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Manejo genérico de errores
+        }
     }
+
 
 }
