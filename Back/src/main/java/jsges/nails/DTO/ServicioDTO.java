@@ -4,23 +4,27 @@ package jsges.nails.DTO;
 
 import jsges.nails.model.ItemServicio;
 import jsges.nails.model.Servicio;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Data
+@NoArgsConstructor
 public class ServicioDTO{
 
-    public Integer id;
-    public Integer cliente;
-    public Timestamp fechaDocumento;
-    public Set<ItemServicioDTO> listaItems = new HashSet<>();
-    public Double total;
-    public String clienteRazonSocial;
-    public ServicioDTO() {
+    private Integer id;
+    @NotNull
+    private Integer cliente;
+    private Timestamp fechaDocumento;
+    private Set<ItemServicioDTO> listaItems = new HashSet<>();
 
-    }
+    private Double total;
+    private String clienteRazonSocial;
 
     public ServicioDTO(Servicio elemento, List<ItemServicio>list) {
 

@@ -31,8 +31,6 @@ public class ArticuloVentaController {
     @Autowired
     private IArticuloVentaService modelService;
 
-    @Autowired
-    private ILineaService lineaService;
 
     public ArticuloVentaController() {
 

@@ -3,11 +3,13 @@ package jsges.nails.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import java.sql.Timestamp;
 
 @Entity
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @ToString
 public class Servicio {
@@ -18,18 +20,16 @@ public class Servicio {
 
         private int estado;
 
-        @ManyToOne(cascade = CascadeType.ALL)
-        private Cliente cliente;
-
         private Timestamp fechaRegistro;
         private Timestamp fechaRealizacion;
         private double total;
 
-
-    public Servicio() {
-
-    }
+        @ManyToOne(cascade = CascadeType.ALL)
+        private Cliente cliente;
 
 
+        public void asEliminado() {
+                this.setEstado(1);
+        }
 
 }

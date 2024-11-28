@@ -1,6 +1,7 @@
 package jsges.nails.service.servicios_Interface;
 
 
+import jsges.nails.DTO.ArticuloVentaDTO;
 import jsges.nails.DTO.ServicioDTO;
 import jsges.nails.model.Servicio;
 import org.springframework.data.domain.Page;
@@ -9,16 +10,21 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface IServicioService {
-    public List<Servicio> listar();
+    List<ServicioDTO> listar();
 
-    public Servicio buscarPorId(Integer id);
+    Servicio buscarPorId(Integer id);
 
-    public Servicio guardar(Servicio model);
+    Servicio guardar(Servicio model);
 
-    public Page<ServicioDTO> findPaginated(Pageable pageable, List<ServicioDTO> servicios);
+    Servicio crearDesdeDTO(ServicioDTO modelDTO);
 
-    public Page<Servicio> getServicios(Pageable pageable);
+    void eliminarServicio(Integer id);
 
-    public List<Servicio> listar(String consulta);
+    ServicioDTO actualizarServicio(Integer id, ServicioDTO modelRecibido);
+
+
+    Page<ServicioDTO> listarPaginado(String consulta, Pageable pageable);
+
+    ServicioDTO obtenerServicioPorId(Integer id);
 
 }

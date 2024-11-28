@@ -41,7 +41,7 @@ public class ClienteService implements IClienteService {
 
     @Override
     public Page<ClienteDTO> listarPaginado(String consulta, Pageable pageable) {
-        Page<Cliente> page = modelRepository.buscarNoEliminadoss(consulta, pageable);
+        Page<Cliente> page = modelRepository.buscarNoEliminados(consulta, pageable);
         return page.map(ClienteDTO::new); // Convierte las entidades a DTO usando map()
     }
 
