@@ -1,6 +1,10 @@
 package jsges.nails.service.servicios;
 
+import jsges.nails.DTO.ClienteDTO;
+import jsges.nails.DTO.TipoObjetoDTO;
 import jsges.nails.DTO.TipoServicioDTO;
+import jsges.nails.excepcion.RecursoNoEncontradoExcepcion;
+import jsges.nails.model.Cliente;
 import jsges.nails.model.TipoServicio;
 import jsges.nails.repository.TipoServicioRepository;
 import jsges.nails.service.servicios_Interface.ITipoServicioService;
@@ -24,9 +28,81 @@ public class TipoServicioService implements ITipoServicioService {
     private static final Logger logger = LoggerFactory.getLogger(TipoServicioService.class);
 
     @Override
-    public List<TipoServicio> listar() {
-        return modelRepository.buscarNoEliminados();
+    public List<TipoServicioDTO> listar() {
+        logger.info("Listando tipos de servicio no eliminados");
+
+        // Convertir directamente la lista de clientes a DTO en el servicio
+        return modelRepository.buscarNoEliminados().stream()
+                .map(TipoServicioDTO::new)  // Convertir cada Cliente a ClienteDTO
+                .toList();  // Retornar la lista de DTOs
     }
+
+    @Override
+    public Page<TipoServicioDTO> listarPaginado(String consulta, Pageable pageable) {
+        Page<TipoServicio> page = modelRepository.buscarNoEliminadoss(consulta, pageable);
+        return page.map(TipoServicioDTO::new); // Convierte las entidades a DTO usando map()
+    }
+
+    @Override
+    public TipoServicio crearDesdeDTO(TipoServicioDTO modelDTO) {
+        // Si necesitas verificar alguna entidad relacionada, puedes hacerlo aquí (por ejemplo, buscando una entidad 'Estado' si fuera necesario).
+
+        // Construye el modelo Cliente desde el DTO
+        TipoServicio model = new TipoServicio();
+
+        model.setDenominacion(modelDTO.getDenominacion());
+        model.setCodigo(modelDTO.getCodigo());
+        model.setDetalle(modelDTO.getDetalle());
+
+
+
+        // Guarda el modelo Cliente en la base de datos
+        return modelRepository.save(model);  // Guarda el cliente en la base de datos
+    }
+
+    @Override
+    public void eliminarTipoServicio(Integer id) {
+        // Buscar el artículo por ID
+        TipoServicio tipoServicio = modelRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoExcepcion("El id recibido no existe: " + id));
+
+        // Marcar como eliminado
+        tipoServicio.asEliminado();
+
+        // Guardar el cambio
+        modelRepository.save(tipoServicio);
+    }
+
+    @Override
+    public TipoServicioDTO obtenerTipoServicioPorId(Integer id) {
+
+        TipoServicio tipoServicio = modelRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No se encontró el cliente con id: " + id));
+
+        // Conversión a DTO
+        return new TipoServicioDTO(tipoServicio);
+    }
+
+
+    @Override
+    public TipoServicioDTO actualizarTipoServicio(Integer id, TipoServicioDTO modelRecibido) {
+
+        // Buscar el cliente existente
+        TipoServicio tipoServicio = modelRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoExcepcion("El tipo de servicio con id " + id + " no existe."));
+
+        // Actualizar los campos del cliente con los valores recibidos
+        tipoServicio.setCodigo(modelRecibido.getCodigo());
+        tipoServicio.setDetalle(modelRecibido.getDetalle());
+        tipoServicio.setDenominacion(modelRecibido.getDenominacion());
+
+        // Guardar los cambios
+        modelRepository.save(tipoServicio);
+
+        // Devolver el DTO actualizado
+        return new TipoServicioDTO(tipoServicio);
+    }
+
 
     @Override
     public TipoServicio buscarPorId(Integer id) {
@@ -41,53 +117,13 @@ public class TipoServicioService implements ITipoServicioService {
     }
 
 
-    @Override
-    public TipoServicio newModel(TipoServicioDTO modelDTO) {
-        TipoServicio model =  new TipoServicio();
-        model.setDenominacion(modelDTO.denominacion);
-        return guardar(model);
-    }
-
-
-    @Override
-    public void eliminar(TipoServicio model) {
-
-        modelRepository.save(model);
-    }
 
     @Override
     public List<TipoServicio> listar(String consulta) {
         //logger.info("service " +consulta);
         return modelRepository.buscarNoEliminados(consulta);
     }
+    
 
-    @Override
-    public Page<TipoServicio> getTiposServicios(Pageable pageable) {
-        return  modelRepository.findAll(pageable);
-    }
-
-    public List<TipoServicio> buscar(String consulta) {
-        return modelRepository.buscarExacto(consulta);
-    }
-
-
-    @Override
-    public Page<TipoServicio> findPaginated(Pageable pageable, List<TipoServicio>lineas) {
-        int pageSize = pageable.getPageSize();
-        int currentPage = pageable.getPageNumber();
-        int startItem = currentPage * pageSize;
-        List<TipoServicio> list;
-        if (lineas.size() < startItem) {
-            list = Collections.emptyList();
-        } else {
-            int toIndex = Math.min(startItem + pageSize, lineas.size());
-            list = lineas.subList(startItem, toIndex);
-        }
-
-        Page<TipoServicio> bookPage
-                = new PageImpl<TipoServicio>(list, PageRequest.of(currentPage, pageSize), lineas.size());
-
-        return bookPage;
-    }
 
 }
