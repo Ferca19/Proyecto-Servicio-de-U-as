@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class LineaDTO extends TipoObjetoDTO {
+public class LineaDTO {
 
+    public Integer id;
     private String denominacion;
     private int estado;
     private String observacion;
