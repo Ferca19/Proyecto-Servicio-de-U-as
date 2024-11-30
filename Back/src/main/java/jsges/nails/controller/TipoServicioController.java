@@ -1,7 +1,9 @@
 package jsges.nails.controller;
 
+import jsges.nails.DTO.ClienteDTO;
 import jsges.nails.DTO.TipoServicioDTO;
 import jsges.nails.excepcion.RecursoNoEncontradoExcepcion;
+import jsges.nails.model.Cliente;
 import jsges.nails.model.TipoServicio;
 import jsges.nails.service.servicios_Interface.ITipoServicioService;
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping(value="${path_mapping}")
@@ -27,63 +30,88 @@ public class TipoServicioController {
 
     }
 
-    @GetMapping({"/tiposServicios"})
-    public List<TipoServicio> getAll() {
-        List<TipoServicio> tipoServicios = this.modelService.listar();
-        return tipoServicios;
+    @GetMapping("/tiposServicios")
+    public ResponseEntity<List<TipoServicioDTO>> getAll() {
+        logger.info("Obteniendo todos los tipos de servicio");
+
+        // Obtén la lista de ClienteDTO directamente del servicio
+        List<TipoServicioDTO> listadoDTO = modelService.listar();
+
+        logger.info("Se encontraron {} clientes", listadoDTO.size());
+        return ResponseEntity.ok(listadoDTO);  // Retorna la lista de DTOs
     }
 
+
     @GetMapping({"/tiposServiciosPageQuery"})
-    public ResponseEntity<Page<TipoServicio>> getItems(@RequestParam(defaultValue = "") String consulta, @RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "${max_page}") int size) {
-        List<TipoServicio> listado = modelService.listar(consulta);
-        Page<TipoServicio> bookPage = modelService.findPaginated(PageRequest.of(page, size),listado);
-        return ResponseEntity.ok().body(bookPage);
+    public ResponseEntity<Page<TipoServicioDTO>> getItems(
+            @RequestParam(defaultValue = "") String consulta,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "${max_page}") int size) {
+
+        Page<TipoServicioDTO> pageResult = modelService.listarPaginado(consulta, PageRequest.of(page, size));
+
+        return ResponseEntity.ok().body(pageResult);
     }
 
 
     @PostMapping("/tiposServicios")
-    public  ResponseEntity<TipoServicio>  agregar(@RequestBody TipoServicioDTO model){
-        List<TipoServicio> list = modelService.buscar(model.denominacion);
-        if (!list.isEmpty()){
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-           // throw new RecursoNoEncontradoExcepcion("Ya existe una linea con la denominacion: " + model.denominacion);
-        }
+    public ResponseEntity<TipoServicioDTO> agregar(@RequestBody TipoServicioDTO modelDTO) {
+        logger.info("Creando un nuevo cliente.");
 
-        TipoServicio nuevoModelo = modelService.newModel(model);
-        return ResponseEntity.ok(nuevoModelo);
+        try {
+            // Validación del DTO
+            if (modelDTO.getDenominacion() == null ) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            // Crear y guardar el modelo
+            TipoServicio newModel = modelService.crearDesdeDTO(modelDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new TipoServicioDTO(newModel));
+        } catch (NoSuchElementException e) {
+            logger.error("Error al buscar la línea: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            logger.error("Error al guardar el artículo: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
-
-    @PutMapping("/tipoServicioEliminar/{id}")
-    public ResponseEntity<TipoServicio> eliminar(@PathVariable Integer id){
-        TipoServicio model = modelService.buscarPorId(id);
-        if (model == null)
-            throw new RecursoNoEncontradoExcepcion("El id recibido no existe: " + id);
-
-        model.setEstado(1);
-
-        modelService.guardar(model);
-        return ResponseEntity.ok(model);
+    @DeleteMapping("/tipoServicioEliminar/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+        try {
+            modelService.eliminarTipoServicio(id);
+            return ResponseEntity.noContent().build(); // Devuelve 204 No Content
+        } catch (RecursoNoEncontradoExcepcion e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Devuelve 404 Not Found
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Manejo genérico de errores
+        }
     }
 
     @GetMapping("/tiposServicios/{id}")
-    public ResponseEntity<TipoServicio> getPorId(@PathVariable Integer id){
-        TipoServicio cliente = modelService.buscarPorId(id);
-        if(cliente == null)
-            throw new RecursoNoEncontradoExcepcion("No se encontro el id: " + id);
-        return ResponseEntity.ok(cliente);
+    public ResponseEntity<TipoServicioDTO> getPorId(@PathVariable Integer id) {
+        try {
+            TipoServicioDTO tipoServicioDTO = modelService.obtenerTipoServicioPorId(id);
+            return ResponseEntity.ok(tipoServicioDTO);
+        } catch (RecursoNoEncontradoExcepcion e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Devuelve 404 Not Found
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Manejo genérico de errores
+        }
     }
 
-    @PutMapping("/tiposServicios/{id}")
-    public ResponseEntity<TipoServicio> actualizar(@PathVariable Integer id,
-                                                   @RequestBody TipoServicio modelRecibido){
-        TipoServicio model = modelService.buscarPorId(id);
-        if (model == null)
-            throw new RecursoNoEncontradoExcepcion("El id recibido no existe: " + id);
 
-        modelService.guardar(modelRecibido);
-        return ResponseEntity.ok(modelRecibido);
+    @PutMapping("/tiposServicios/{id}")
+    public ResponseEntity<TipoServicioDTO> actualizar(@PathVariable Integer id, @RequestBody TipoServicioDTO modelRecibido) {
+
+        try {
+            TipoServicioDTO tiposServicioActualizado = modelService.actualizarTipoServicio(id, modelRecibido);
+            return ResponseEntity.ok(tiposServicioActualizado);
+        } catch (RecursoNoEncontradoExcepcion e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Devuelve 404 si no existe el artículo
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Manejo genérico de errores
+        }
     }
 
 }
