@@ -4,8 +4,9 @@ import jsges.nails.model.Linea;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+
 @NoArgsConstructor
+@Data
 public class LineaDTO extends TipoObjetoDTO {
 
     private String denominacion;

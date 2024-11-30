@@ -63,7 +63,7 @@ public class LineaController {
 
         try {
             // Validación del DTO
-            if (modelDTO.getObservacion() == null || modelDTO.getDenominacion().trim().isEmpty()) {
+            if ( modelDTO.getDenominacion().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(null);
             }
 

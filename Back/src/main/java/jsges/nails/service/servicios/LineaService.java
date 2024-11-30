@@ -30,8 +30,12 @@ public class LineaService implements ILineaService {
 
     @Override
     public List<LineaDTO> listar() {
-        return modelRepository.buscarNoEliminados();
+        return modelRepository.buscarNoEliminados()
+                .stream()
+                .map(LineaDTO::new) // Convierte cada entidad a DTO
+                .toList();
     }
+
 
     @Override
     public Page<LineaDTO> listarPaginado(String consulta, Pageable pageable) {
@@ -104,11 +108,6 @@ public class LineaService implements ILineaService {
         return modelRepository.save(model);
     }
 
-    @Override
-    public List<Linea> listar(String consulta) {
-        //logger.info("service " +consulta);
-        return modelRepository.buscarNoEliminados(consulta);
-    }
 
     public List<Linea> buscar(String consulta) {
         return modelRepository.buscarExacto(consulta);

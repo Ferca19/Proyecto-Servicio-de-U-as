@@ -27,7 +27,6 @@ public interface ILineaService {
 
     Linea guardar(Linea model);
 
-    List<Linea> listar(String consulta);
 
     List<Linea> buscar(String consulta);
 
