@@ -123,7 +123,7 @@ public class TipoServicioService implements ITipoServicioService {
         //logger.info("service " +consulta);
         return modelRepository.buscarNoEliminados(consulta);
     }
-    
+
 
 
 }
