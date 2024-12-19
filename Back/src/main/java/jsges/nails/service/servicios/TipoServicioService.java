@@ -1,10 +1,8 @@
 package jsges.nails.service.servicios;
 
-import jsges.nails.DTO.ClienteDTO;
-import jsges.nails.DTO.TipoObjetoDTO;
 import jsges.nails.DTO.TipoServicioDTO;
 import jsges.nails.excepcion.RecursoNoEncontradoExcepcion;
-import jsges.nails.model.Cliente;
+import jsges.nails.mapper.TipoServicioMapper;
 import jsges.nails.model.TipoServicio;
 import jsges.nails.repository.TipoServicioRepository;
 import jsges.nails.service.servicios_Interface.ITipoServicioService;
@@ -12,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,28 +29,21 @@ public class TipoServicioService implements ITipoServicioService {
 
         // Convertir directamente la lista de clientes a DTO en el servicio
         return modelRepository.buscarNoEliminados().stream()
-                .map(TipoServicioDTO::new)  // Convertir cada Cliente a ClienteDTO
+                .map(TipoServicioMapper::toDTO)  // Convertir cada Cliente a ClienteDTO
                 .toList();  // Retornar la lista de DTOs
     }
 
     @Override
     public Page<TipoServicioDTO> listarPaginado(String consulta, Pageable pageable) {
         Page<TipoServicio> page = modelRepository.buscarNoEliminadoss(consulta, pageable);
-        return page.map(TipoServicioDTO::new); // Convierte las entidades a DTO usando map()
+        return page.map(TipoServicioMapper::toDTO); // Convierte las entidades a DTO usando map()
     }
 
     @Override
     public TipoServicio crearDesdeDTO(TipoServicioDTO modelDTO) {
-        // Si necesitas verificar alguna entidad relacionada, puedes hacerlo aquí (por ejemplo, buscando una entidad 'Estado' si fuera necesario).
 
-        // Construye el modelo Cliente desde el DTO
-        TipoServicio model = new TipoServicio();
-
-        model.setDenominacion(modelDTO.getDenominacion());
-        model.setCodigo(modelDTO.getCodigo());
-        model.setDetalle(modelDTO.getDetalle());
-
-
+        // Convierte el DTO a una entidad usando el mapper
+        TipoServicio model = TipoServicioMapper.toEntity(modelDTO);
 
         // Guarda el modelo Cliente en la base de datos
         return modelRepository.save(model);  // Guarda el cliente en la base de datos
@@ -79,8 +68,8 @@ public class TipoServicioService implements ITipoServicioService {
         TipoServicio tipoServicio = modelRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No se encontró el cliente con id: " + id));
 
-        // Conversión a DTO
-        return new TipoServicioDTO(tipoServicio);
+        // Conversión a DTO usando el mapper
+        return TipoServicioMapper.toDTO(tipoServicio);
     }
 
 
@@ -97,10 +86,10 @@ public class TipoServicioService implements ITipoServicioService {
         tipoServicio.setDenominacion(modelRecibido.getDenominacion());
 
         // Guardar los cambios
-        modelRepository.save(tipoServicio);
+        TipoServicio tipoServicioActualizado = modelRepository.save(tipoServicio);
 
-        // Devolver el DTO actualizado
-        return new TipoServicioDTO(tipoServicio);
+        // Devolver el DTO actualizado usando el mapper
+        return TipoServicioMapper.toDTO(tipoServicioActualizado);
     }
 
 

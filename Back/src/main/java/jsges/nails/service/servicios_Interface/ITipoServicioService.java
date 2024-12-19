@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface ITipoServicioService {
 
-    public List<TipoServicioDTO> listar();
+    List<TipoServicioDTO> listar();
 
     Page<TipoServicioDTO> listarPaginado(String consulta, Pageable pageable);
 
@@ -24,12 +24,12 @@ public interface ITipoServicioService {
 
     TipoServicioDTO actualizarTipoServicio(Integer id, TipoServicioDTO modelRecibido);
 
-    public TipoServicio buscarPorId(Integer id);
+    TipoServicio buscarPorId(Integer id);
 
-    public TipoServicio guardar(TipoServicio model);
+    TipoServicio guardar(TipoServicio model);
 
 
-    public List<TipoServicio> listar(String consulta);
+    List<TipoServicio> listar(String consulta);
 
 
 }

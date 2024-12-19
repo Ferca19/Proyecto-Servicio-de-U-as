@@ -19,6 +19,7 @@ public class TipoServicio {
 
     @Column(columnDefinition = "TEXT")
     private String denominacion;
+
     private int estado;
 
     @Column(columnDefinition = "TEXT")
